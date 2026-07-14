@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import date, timedelta
+from datetime import date
 from pathlib import Path
 
 import numpy as np
@@ -10,7 +10,7 @@ import streamlit as st
 
 
 st.set_page_config(
-    page_title="Simulador NDF | Hedge Cambial",
+    page_title="Simulador NDF | Validado",
     page_icon="💱",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -20,159 +20,93 @@ st.markdown(
     """
     <style>
         :root {
-            --bg: #f5f7fb;
+            --bg: #f6f8fc;
             --surface: #ffffff;
-            --surface-2: #f9fbff;
-            --border: #dfe7f3;
-            --text: #132238;
-            --muted: #6b7a90;
+            --border: #dce5f2;
+            --text: #12233d;
+            --muted: #66758c;
             --primary: #1d4ed8;
-            --primary-soft: #e8f0ff;
-            --success-soft: #edfdf3;
+            --primary-soft: #ecf3ff;
             --shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
         }
-
         html, body, [data-testid="stAppViewContainer"], [data-testid="stAppViewContainer"] > .main {
             background: var(--bg) !important;
             color: var(--text) !important;
         }
-
-        [data-testid="stHeader"] {
-            background: rgba(245, 247, 251, 0.92) !important;
-        }
-
-        .block-container {
-            padding-top: 1.1rem;
-            padding-bottom: 2rem;
-            max-width: 1500px;
-        }
-
+        [data-testid="stHeader"] { background: rgba(246, 248, 252, .94) !important; }
+        .block-container { padding-top: 1rem; padding-bottom: 2rem; max-width: 1500px; }
         [data-testid="stSidebar"] {
-            background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%) !important;
+            background: linear-gradient(180deg, #ffffff 0%, #f7fbff 100%) !important;
             border-right: 1px solid var(--border);
         }
-
-        [data-testid="stSidebar"] * {
-            color: var(--text) !important;
-        }
-
-        [data-testid="stSidebar"] [data-baseweb="input"],
-        [data-testid="stSidebar"] [data-baseweb="select"],
-        [data-testid="stSidebar"] [data-baseweb="popover"],
-        [data-testid="stSidebar"] .stDateInput > div,
-        [data-testid="stSidebar"] .stNumberInput > div {
-            background: #ffffff !important;
-        }
-
+        [data-testid="stSidebar"] * { color: var(--text) !important; }
         [data-baseweb="input"] > div,
         [data-baseweb="select"] > div,
         .stDateInput > div > div,
-        .stNumberInput > div > div,
-        .stTextInput > div > div {
+        .stTextInput > div > div,
+        .stNumberInput > div > div {
             border-radius: 12px !important;
             border: 1px solid var(--border) !important;
             background: #ffffff !important;
             box-shadow: none !important;
         }
-
-        label, .stRadio label, .stSelectbox label, .stDateInput label, .stNumberInput label {
-            color: var(--text) !important;
-            font-weight: 600 !important;
-        }
-
+        label { font-weight: 600 !important; color: var(--text) !important; }
         .hero-card {
-            background: linear-gradient(135deg, #ffffff 0%, #f1f7ff 100%);
-            border: 1px solid #d9e7ff;
+            background: linear-gradient(135deg, #ffffff 0%, #f2f7ff 100%);
+            border: 1px solid #dce8ff;
             border-radius: 22px;
             padding: 24px 26px 18px 26px;
-            margin-bottom: 10px;
             box-shadow: var(--shadow);
+            margin-bottom: 14px;
         }
-
         .hero-title {
-            font-size: 2.15rem;
-            line-height: 1.1;
+            font-size: 2.05rem;
             font-weight: 800;
             color: var(--text);
+            line-height: 1.1;
             margin: 0;
         }
-
         .hero-subtitle {
-            font-size: 0.98rem;
             color: var(--muted);
             margin-top: 8px;
-            margin-bottom: 16px;
+            margin-bottom: 14px;
+            font-size: .98rem;
         }
-
-        .hero-chips {
+        .hero-chip-wrap {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
         }
-
         .hero-chip {
-            background: rgba(29, 78, 216, 0.08);
+            background: var(--primary-soft);
             color: var(--primary);
-            padding: 8px 12px;
+            border: 1px solid #d5e4ff;
             border-radius: 999px;
-            font-size: 0.88rem;
-            font-weight: 600;
-            border: 1px solid rgba(29, 78, 216, 0.10);
+            padding: 8px 12px;
+            font-size: .88rem;
+            font-weight: 700;
         }
-
+        [data-testid="stMetric"] {
+            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: var(--shadow);
+        }
+        [data-testid="stMetricLabel"] { color: var(--muted) !important; font-weight: 700; }
+        [data-testid="stMetricValue"] { color: var(--text) !important; font-weight: 800; }
         .section-title {
             font-size: 1.30rem;
             font-weight: 800;
             color: var(--text);
-            margin-bottom: .6rem;
+            margin: 18px 0 10px 0;
         }
-
-        [data-testid="stTabs"] {
-            margin-top: 0.35rem;
+        .section-subtitle {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text);
+            margin: 6px 0 10px 0;
         }
-
-        [data-testid="stTabs"] [role="tablist"] {
-            gap: 8px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 10px;
-        }
-
-        [data-testid="stTabs"] [role="tab"] {
-            background: #ffffff;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 8px 14px;
-            color: var(--text) !important;
-            font-weight: 600;
-            height: auto;
-        }
-
-        [data-testid="stTabs"] [aria-selected="true"] {
-            background: var(--primary-soft) !important;
-            color: var(--primary) !important;
-            border-color: #c9dbff !important;
-        }
-
-        [data-testid="stMetric"] {
-            background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
-            border: 1px solid var(--border);
-            padding: 16px 16px;
-            border-radius: 18px;
-            box-shadow: var(--shadow);
-        }
-
-        [data-testid="stMetricLabel"] {
-            font-size: 0.84rem;
-            color: var(--muted) !important;
-            font-weight: 600;
-        }
-
-        [data-testid="stMetricValue"] {
-            font-size: 1.55rem;
-            color: var(--text) !important;
-            font-weight: 800;
-        }
-
         [data-testid="stDataFrame"] {
             background: #ffffff;
             border: 1px solid var(--border);
@@ -180,433 +114,305 @@ st.markdown(
             box-shadow: var(--shadow);
             overflow: hidden;
         }
-
         .stAlert {
             border-radius: 16px;
             border: 1px solid var(--border);
             box-shadow: var(--shadow);
         }
-
-        .small-note {
-            font-size: 0.90rem;
-            color: var(--muted);
-            line-height: 1.6;
+        .small-box {
             background: #ffffff;
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 16px 18px;
+            border-radius: 18px;
+            padding: 18px;
+            box-shadow: var(--shadow);
         }
-
-        .footer-note {
+        .small-note {
+            font-size: .91rem;
             color: var(--muted);
-            font-size: 0.86rem;
+            line-height: 1.55;
         }
     </style>
     """,
     unsafe_allow_html=True,
 )
 
-
 px.defaults.template = "plotly_white"
 
 
-def brl(value: float, decimals: int = 2) -> str:
-    text = f"{value:,.{decimals}f}"
-    return "R$ " + text.replace(",", "X").replace(".", ",").replace("X", ".")
+def parse_decimal(value: str) -> float:
+    txt = str(value).strip().replace(".", "").replace(",", ".") if "," in str(value) else str(value).strip()
+    return float(txt)
 
 
-def usd(value: float, decimals: int = 2) -> str:
-    text = f"{value:,.{decimals}f}"
-    return "US$ " + text.replace(",", "X").replace(".", ",").replace("X", ".")
+def dec4(value: float) -> str:
+    return f"{value:,.4f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
-def count_business_days(start: date, end: date) -> int:
-    if end <= start:
-        return 0
-    return int(np.busday_count(start.isoformat(), end.isoformat()))
+def dec2(value: float) -> str:
+    return f"{value:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
-def forward_rate(
-    spot: float,
-    br_rate: float,
-    us_rate: float,
-    business_days: int,
-    calendar_days: int,
-) -> tuple[float, float, float]:
-    br_factor = (1 + br_rate) ** (business_days / 252)
-    us_factor = (1 + us_rate) ** (calendar_days / 360)
-    forward = spot * br_factor / us_factor
-    return forward, br_factor, us_factor
+def money_brl(value: float, decimals: int = 0) -> str:
+    formatted = f"{value:,.{decimals}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"R$ {formatted}"
 
 
-def ndf_pnl(
-    settlement_fx: float,
-    contracted_fx: float,
-    notional_usd: float,
-    direction: str,
-) -> float:
+def money_usd(value: float, decimals: int = 0) -> str:
+    formatted = f"{value:,.{decimals}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"US$ {formatted}"
+
+
+def pct(value: float) -> str:
+    return f"{value:.2f}%".replace(".", ",")
+
+
+def linear_forward(spot: float, base_rate: float, quote_rate: float, days: int, basis: int = 360) -> tuple[float, float, float, float]:
+    base_factor = 1 + base_rate * days / basis
+    quote_factor = 1 + quote_rate * days / basis
+    forward = spot * quote_factor / base_factor
+    return forward, base_factor, quote_factor, forward - spot
+
+
+def ndf_pnl(settlement_fx: float, contracted_fx: float, notional_usd: float, direction: str) -> float:
     base = (settlement_fx - contracted_fx) * notional_usd
     return base if direction == "Compra de USD" else -base
 
 
-def style_plotly(fig, y_title: str):
+def chart_style(fig, y_title: str):
     fig.update_layout(
         template="plotly_white",
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="#ffffff",
-        font=dict(color="#132238"),
+        font=dict(color="#12233d"),
         title_font=dict(size=18),
-        xaxis_title="BRL por USD",
-        yaxis_title=y_title,
         hovermode="x unified",
+        xaxis_title="PTAX / BRL por USD",
+        yaxis_title=y_title,
         margin=dict(l=20, r=20, t=60, b=20),
         legend_title_text="",
     )
     fig.update_xaxes(showgrid=False, zeroline=False)
-    fig.update_yaxes(gridcolor="#e8edf5", zeroline=False)
+    fig.update_yaxes(gridcolor="#e7edf5", zeroline=False)
     return fig
 
 
+DEFAULT_START = date(2026, 7, 14)
+DEFAULT_END = date(2027, 7, 9)
+
 with st.sidebar:
-    st.markdown("## Parâmetros da operação")
-    st.caption("Preencha abaixo os principais dados da simulação.")
+    st.markdown("## Parâmetros")
+    st.caption("Estrutura simplificada e alinhada com a calculadora de taxa a termo.")
 
-    direction = st.selectbox(
-        "Tipo de proteção",
-        ["Compra de USD", "Venda de USD"],
-        help="Compra de USD protege uma obrigação futura em dólar. Venda de USD protege um recebimento futuro.",
-    )
-
-    notional = st.number_input(
-        "Nocional em USD",
-        min_value=1_000.0,
-        value=1_000_000.0,
-        step=50_000.0,
-        format="%.2f",
-    )
-
-    start_date = st.date_input("Data da operação", value=date.today())
-    maturity_date = st.date_input(
-        "Data de vencimento",
-        value=date.today() + timedelta(days=180),
-    )
+    pair = st.selectbox("Par de moedas", ["USD/BRL", "BRL/USD"], index=0)
+    direction = st.selectbox("Tipo de proteção", ["Compra de USD", "Venda de USD"], index=0)
+    notional = st.number_input("Nocional em USD", min_value=1_000.0, value=1_000_000.0, step=50_000.0, format="%.2f")
 
     st.divider()
 
-    spot = st.number_input(
-        "Dólar spot (BRL/USD)",
-        min_value=0.01,
-        value=5.20,
-        step=0.01,
-        format="%.4f",
-    )
-
-    br_rate_pct = st.number_input(
-        "Juros BRL a.a.",
-        min_value=0.0,
-        value=14.75,
-        step=0.10,
-        format="%.4f",
-    )
-
-    us_rate_pct = st.number_input(
-        "Juros USD a.a.",
-        min_value=0.0,
-        value=4.50,
-        step=0.10,
-        format="%.4f",
-    )
-
-    st.divider()
-
-    spread_mode = st.radio(
-        "Forma de inserir o spread",
-        ["Pontos de câmbio", "Percentual sobre o forward"],
-        horizontal=False,
-    )
-
-    if spread_mode == "Pontos de câmbio":
-        spread_points = st.number_input(
-            "Spread do banco em pontos",
-            value=0.0300,
-            step=0.0050,
-            format="%.4f",
-        )
-        spread_pct = 0.0
+    if pair == "USD/BRL":
+        default_spot = "5,0725"
+        default_base = "3,75"
+        default_quote = "14,25"
+        base_ccy = "USD"
+        quote_ccy = "BRL"
     else:
-        spread_pct = st.number_input(
-            "Spread do banco (%)",
-            value=0.50,
-            step=0.05,
-            format="%.4f",
-        ) / 100
-        spread_points = 0.0
+        default_spot = "0,1971"
+        default_base = "14,25"
+        default_quote = "3,75"
+        base_ccy = "BRL"
+        quote_ccy = "USD"
 
-    use_manual_contract = st.checkbox("Informar taxa contratada manualmente")
-    manual_contract = None
-    if use_manual_contract:
-        manual_contract = st.number_input(
-            "Taxa contratada",
-            min_value=0.01,
-            value=5.50,
-            step=0.01,
-            format="%.4f",
-        )
+    spot_str = st.text_input("Preço à vista", value=default_spot)
+    base_rate_str = st.text_input(f"Juros da moeda base ({base_ccy}) % a.a.", value=default_base)
+    quote_rate_str = st.text_input(f"Juros da moeda cotada ({quote_ccy}) % a.a.", value=default_quote)
+
+    settlement_date = st.date_input("Data de liquidação", value=DEFAULT_START, format="DD/MM/YYYY")
+    forward_date = st.date_input("Data da taxa a termo", value=DEFAULT_END, format="DD/MM/YYYY")
+
+    days = (forward_date - settlement_date).days
+    st.text_input("Dias", value=str(days), disabled=True)
+    basis_label = st.selectbox("Base", ["Dias/360"], index=0)
+    basis = 360
 
     st.divider()
-    st.caption("Versão visual clara forçada para navegação mais limpa.")
+    spread_str = st.text_input("Spread do banco em pontos (BRL/USD)", value="0,0300")
+    use_manual_contract = st.checkbox("Informar taxa contratada manualmente")
+    manual_contract_str = st.text_input("Taxa contratada (BRL/USD)", value="5,6159", disabled=not use_manual_contract)
 
-if maturity_date <= start_date:
-    st.error("A data de vencimento precisa ser posterior à data da operação.")
+try:
+    spot = parse_decimal(spot_str)
+    base_rate = parse_decimal(base_rate_str) / 100
+    quote_rate = parse_decimal(quote_rate_str) / 100
+    spread_points = parse_decimal(spread_str)
+    manual_contract = parse_decimal(manual_contract_str) if use_manual_contract else None
+except Exception:
+    st.error("Revise os campos numéricos. Use formatos como 5,0725 ou 14,25.")
     st.stop()
 
-calendar_days = (maturity_date - start_date).days
-business_days = count_business_days(start_date, maturity_date)
+if days <= 0:
+    st.error("A data da taxa a termo precisa ser posterior à data de liquidação.")
+    st.stop()
 
-br_rate = br_rate_pct / 100
-us_rate = us_rate_pct / 100
-
-fair_forward, br_factor, us_factor = forward_rate(
+forward_rate_pair, base_factor, quote_factor, term_points_pair = linear_forward(
     spot=spot,
-    br_rate=br_rate,
-    us_rate=us_rate,
-    business_days=business_days,
-    calendar_days=calendar_days,
+    base_rate=base_rate,
+    quote_rate=quote_rate,
+    days=days,
+    basis=basis,
 )
 
-if spread_mode == "Pontos de câmbio":
-    quoted_forward = (
-        fair_forward + spread_points if direction == "Compra de USD" else fair_forward - spread_points
-    )
+pips = term_points_pair * 10000
+
+# Taxa operacional BRL/USD para o hedge
+if pair == "USD/BRL":
+    fair_forward_brlusd = forward_rate_pair
+    spot_brlusd = spot
 else:
-    quoted_forward = (
-        fair_forward * (1 + spread_pct) if direction == "Compra de USD" else fair_forward * (1 - spread_pct)
-    )
+    fair_forward_brlusd = 1 / forward_rate_pair
+    spot_brlusd = 1 / spot
 
-contracted_forward = manual_contract if manual_contract is not None else quoted_forward
-
-implied_spread_points = (
-    contracted_forward - fair_forward if direction == "Compra de USD" else fair_forward - contracted_forward
-)
-implied_spread_brl = implied_spread_points * notional
-protected_value_brl = contracted_forward * notional
+quoted_forward_brlusd = fair_forward_brlusd + spread_points if direction == "Compra de USD" else fair_forward_brlusd - spread_points
+contracted_forward_brlusd = manual_contract if manual_contract is not None else quoted_forward_brlusd
+implied_spread_brl = abs(contracted_forward_brlusd - fair_forward_brlusd) * notional
+protected_value_brl = contracted_forward_brlusd * notional
 
 st.markdown(
     f"""
     <div class="hero-card">
         <div class="hero-title">Simulador de NDF e Hedge Cambial</div>
-        <div class="hero-subtitle">MVP para precificação indicativa, análise de spread e simulação de resultado no vencimento.</div>
-        <div class="hero-chips">
+        <div class="hero-subtitle">Versão mais objetiva, com datas em DD/MM/AAAA, números no padrão brasileiro e fórmula aderente à sua calculadora de taxa a termo.</div>
+        <div class="hero-chip-wrap">
+            <div class="hero-chip">{pair}</div>
             <div class="hero-chip">{direction}</div>
-            <div class="hero-chip">Nocional: {usd(notional, 0)}</div>
-            <div class="hero-chip">Forward justo: {fair_forward:.4f}</div>
-            <div class="hero-chip">Taxa considerada: {contracted_forward:.4f}</div>
-            <div class="hero-chip">Prazo: {calendar_days} dias corridos</div>
+            <div class="hero-chip">Nocional: {money_usd(notional, 0)}</div>
+            <div class="hero-chip">Dias: {days}</div>
+            <div class="hero-chip">Base: {basis_label}</div>
         </div>
     </div>
     """,
     unsafe_allow_html=True,
 )
 
-quick_1, quick_2, quick_3, quick_4 = st.columns(4)
-quick_1.metric("Spot", f"{spot:.4f}")
-quick_2.metric("Forward justo", f"{fair_forward:.4f}")
-quick_3.metric("Taxa considerada", f"{contracted_forward:.4f}")
-quick_4.metric("Valor protegido", brl(protected_value_brl, 0))
+m1, m2, m3, m4, m5 = st.columns(5)
+m1.metric("Preço à vista", dec4(spot))
+m2.metric("Taxa a termo", dec4(forward_rate_pair))
+m3.metric("Termo em pontos", dec4(term_points_pair))
+m4.metric("Pips", dec2(pips))
+m5.metric("Valor protegido", money_brl(protected_value_brl, 0))
 
-st.markdown('<div class="section-title">Análises da operação</div>', unsafe_allow_html=True)
+st.markdown('<div class="section-title">Resultado da operação</div>', unsafe_allow_html=True)
+col_left, col_right = st.columns([1, 1.6])
 
+with col_left:
+    st.markdown('<div class="small-box">', unsafe_allow_html=True)
+    st.markdown('<div class="section-subtitle">Cenário de liquidação</div>', unsafe_allow_html=True)
+    settlement_fx = st.text_input("PTAX simulada (BRL/USD)", value=dec4(contracted_forward_brlusd * 1.03), key="settle")
+    try:
+        settlement_fx_val = parse_decimal(settlement_fx)
+    except Exception:
+        st.error("PTAX simulada inválida.")
+        st.stop()
 
-tab1, tab2, tab3, tab4 = st.tabs(
-    [
-        "Precificação",
-        "Resultado no vencimento",
-        "Hedge x sem hedge",
-        "Memória de cálculo",
-    ]
-)
+    pnl = ndf_pnl(settlement_fx_val, contracted_forward_brlusd, notional, direction)
+    unhedged_value = settlement_fx_val * notional
+    hedged_value = contracted_forward_brlusd * notional
+    effective_value = unhedged_value - pnl if direction == "Compra de USD" else unhedged_value + pnl
 
-with tab1:
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Forward justo", f"{fair_forward:.4f}")
-    c2.metric("Taxa considerada", f"{contracted_forward:.4f}")
-    c3.metric("Forward points", f"{fair_forward - spot:.4f}")
-    c4.metric("Spread implícito", f"{implied_spread_points:.4f}")
+    a1, a2 = st.columns(2)
+    a1.metric("Taxa considerada", dec4(contracted_forward_brlusd))
+    a2.metric("Resultado do NDF", money_brl(pnl, 0))
 
-    c5, c6, c7, c8 = st.columns(4)
-    c5.metric("Nocional", usd(notional, 0))
-    c6.metric("Prazo corrido", f"{calendar_days} dias")
-    c7.metric("Prazo útil", f"{business_days} dias")
-    c8.metric("Custo implícito do spread", brl(implied_spread_brl, 0))
+    b1, b2 = st.columns(2)
+    b1.metric("Sem hedge", money_brl(unhedged_value, 0))
+    b2.metric("Com hedge", money_brl(effective_value, 0))
 
-    st.subheader("Resumo da operação")
-    summary_df = pd.DataFrame(
+    st.caption(
+        "Compra de USD: o derivativo compensa a alta do câmbio. Venda de USD: o derivativo protege a receita em reais."
+    )
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with col_right:
+    low = max(0.10, contracted_forward_brlusd * 0.85)
+    high = contracted_forward_brlusd * 1.15
+    fx_range = np.linspace(low, high, 61)
+    without_hedge = fx_range * notional
+    with_hedge = np.full_like(fx_range, contracted_forward_brlusd * notional)
+
+    chart_df = pd.DataFrame(
         {
-            "Campo": [
-                "Direção",
-                "Spot",
-                "Juros BRL",
-                "Juros USD",
-                "Forward justo",
-                "Taxa simulada/contratada",
-                "Diferença para o justo",
-                "Valor protegido em R$",
-            ],
-            "Valor": [
-                direction,
-                f"{spot:.4f}",
-                f"{br_rate_pct:.2f}% a.a.",
-                f"{us_rate_pct:.2f}% a.a.",
-                f"{fair_forward:.4f}",
-                f"{contracted_forward:.4f}",
-                f"{implied_spread_points:.4f}",
-                brl(protected_value_brl, 0),
-            ],
-        }
-    )
-    st.dataframe(summary_df, hide_index=True, use_container_width=True)
-
-    st.info(
-        "Neste MVP, os dias úteis consideram apenas segunda a sexta. "
-        "Feriados locais e convenções específicas de cada contrato devem ser incluídos na versão de produção."
-    )
-
-with tab2:
-    st.subheader("Simulação de liquidação")
-
-    default_settlement = float(round(contracted_forward * 1.05, 4))
-    settlement_fx = st.number_input(
-        "PTAX / taxa de referência no vencimento",
-        min_value=0.01,
-        value=default_settlement,
-        step=0.01,
-        format="%.4f",
-    )
-
-    pnl = ndf_pnl(
-        settlement_fx=settlement_fx,
-        contracted_fx=contracted_forward,
-        notional_usd=notional,
-        direction=direction,
-    )
-
-    r1, r2, r3 = st.columns(3)
-    r1.metric("Taxa contratada", f"{contracted_forward:.4f}")
-    r2.metric("Taxa no vencimento", f"{settlement_fx:.4f}")
-    r3.metric("Resultado do NDF", brl(pnl, 0))
-
-    low = max(0.10, contracted_forward * 0.80)
-    high = contracted_forward * 1.20
-    scenario_rates = np.linspace(low, high, 81)
-
-    scenario_df = pd.DataFrame(
-        {
-            "Taxa no vencimento": scenario_rates,
-            "Resultado do NDF": [ndf_pnl(x, contracted_forward, notional, direction) for x in scenario_rates],
+            "PTAX / BRL por USD": np.tile(fx_range, 2),
+            "Valor em R$": np.concatenate([without_hedge, with_hedge]),
+            "Estratégia": ["Sem hedge"] * len(fx_range) + ["Com NDF"] * len(fx_range),
         }
     )
 
-    fig = px.line(
-        scenario_df,
-        x="Taxa no vencimento",
-        y="Resultado do NDF",
-        markers=False,
-        title="Resultado financeiro por cenário de câmbio",
-    )
-    fig.add_hline(y=0, line_dash="dash", line_color="#94a3b8")
-    fig.add_vline(x=contracted_forward, line_dash="dash", line_color="#1d4ed8")
-    style_plotly(fig, "Resultado em R$")
+    graph_title = "Custo da obrigação com e sem hedge" if direction == "Compra de USD" else "Receita do recebimento com e sem hedge"
+    fig = px.line(chart_df, x="PTAX / BRL por USD", y="Valor em R$", color="Estratégia", title=graph_title)
+    chart_style(fig, "Valor total em R$")
     st.plotly_chart(fig, use_container_width=True)
 
-    sample_points = np.linspace(contracted_forward * 0.90, contracted_forward * 1.10, 9)
-    sample_df = pd.DataFrame(
-        {
-            "Taxa no vencimento": [f"{x:.4f}" for x in sample_points],
-            "Resultado do NDF": [brl(ndf_pnl(x, contracted_forward, notional, direction), 0) for x in sample_points],
-        }
+st.markdown('<div class="section-title">Resumo rápido</div>', unsafe_allow_html=True)
+summary_df = pd.DataFrame(
+    {
+        "Campo": [
+            "Par de moedas",
+            "Data de liquidação",
+            "Data da taxa a termo",
+            "Preço à vista",
+            f"Juros moeda base ({base_ccy})",
+            f"Juros moeda cotada ({quote_ccy})",
+            "Taxa a termo",
+            "Termo em pontos",
+            "Pips",
+            "Taxa operacional para hedge (BRL/USD)",
+        ],
+        "Valor": [
+            pair,
+            settlement_date.strftime("%d/%m/%Y"),
+            forward_date.strftime("%d/%m/%Y"),
+            dec4(spot),
+            pct(base_rate * 100),
+            pct(quote_rate * 100),
+            dec6 := f"{forward_rate_pair:,.6f}".replace(",", "X").replace(".", ",").replace("X", "."),
+            dec6p := f"{term_points_pair:,.6f}".replace(",", "X").replace(".", ",").replace("X", "."),
+            dec2(pips),
+            dec4(contracted_forward_brlusd),
+        ],
+    }
+)
+st.dataframe(summary_df, hide_index=True, use_container_width=True)
+
+with st.expander("Memória de cálculo e validação"):
+    validation_text = (
+        "Com os inputs do seu print — USD/BRL, spot 5,0725, juros base 3,75%, juros cotada 14,25% e 360 dias — "
+        "a fórmula abaixo gera taxa a termo de 5,585861, termo em pontos de 0,513361 e pips de 5.133,61."
     )
-    st.dataframe(sample_df, hide_index=True, use_container_width=True)
-
-with tab3:
-    st.subheader("Comparativo: exposição aberta x protegida")
-
-    comparison_rates = np.linspace(contracted_forward * 0.85, contracted_forward * 1.15, 61)
-    unhedged = comparison_rates * notional
-    hedged = np.full_like(comparison_rates, contracted_forward * notional)
-
-    if direction == "Compra de USD":
-        y_title = "Custo total em R$"
-        chart_title = "Custo da obrigação com e sem hedge"
-    else:
-        y_title = "Receita total em R$"
-        chart_title = "Receita do recebimento com e sem hedge"
-
-    hedge_df = pd.DataFrame(
-        {
-            "Taxa no vencimento": np.tile(comparison_rates, 2),
-            "Valor em R$": np.concatenate([unhedged, hedged]),
-            "Estratégia": ["Sem hedge"] * len(comparison_rates) + ["Com NDF"] * len(comparison_rates),
-        }
-    )
-
-    fig2 = px.line(
-        hedge_df,
-        x="Taxa no vencimento",
-        y="Valor em R$",
-        color="Estratégia",
-        title=chart_title,
-    )
-    style_plotly(fig2, y_title)
-    st.plotly_chart(fig2, use_container_width=True)
-
-    explanation = (
-        "Para uma compra de USD, o NDF transforma o custo cambial variável em um custo aproximadamente fixo na taxa contratada."
-        if direction == "Compra de USD"
-        else "Para uma venda de USD, o NDF transforma a receita cambial variável em uma receita aproximadamente fixa na taxa contratada."
-    )
-    st.success(explanation)
-
-with tab4:
-    st.subheader("Memória de cálculo")
+    st.info(validation_text)
 
     calc_df = pd.DataFrame(
         {
             "Etapa": [
-                "Dias corridos",
-                "Dias úteis",
-                "Fator BRL",
-                "Fator USD",
-                "Forward justo",
-                "Spread aplicado",
-                "Taxa final",
+                "Base de cálculo",
+                "Fator da moeda base",
+                "Fator da moeda cotada",
+                "Fórmula da taxa a termo",
+                "Termo em pontos",
+                "Pips",
+                "Observação do hedge",
             ],
-            "Cálculo / valor": [
-                f"{calendar_days}",
-                f"{business_days}",
-                f"(1 + {br_rate:.6f}) ^ ({business_days}/252) = {br_factor:.8f}",
-                f"(1 + {us_rate:.6f}) ^ ({calendar_days}/360) = {us_factor:.8f}",
-                f"{spot:.4f} × ({br_factor:.8f} / {us_factor:.8f}) = {fair_forward:.4f}",
-                f"{spread_points:.4f} ponto(s)" if spread_mode == "Pontos de câmbio" else f"{spread_pct * 100:.4f}%",
-                f"{contracted_forward:.4f}",
+            "Valor": [
+                f"Juros simples, {days}/{basis}",
+                f"1 + {base_rate:.6f} × {days}/{basis} = {base_factor:.8f}",
+                f"1 + {quote_rate:.6f} × {days}/{basis} = {quote_factor:.8f}",
+                f"{dec4(spot)} × ({quote_factor:.8f} / {base_factor:.8f}) = {forward_rate_pair:,.6f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                f"{term_points_pair:,.6f}".replace(",", "X").replace(".", ",").replace("X", "."),
+                dec2(pips),
+                "Para o bloco de hedge, a operação é convertida e analisada em BRL/USD.",
             ],
         }
     )
     st.dataframe(calc_df, hide_index=True, use_container_width=True)
 
-    st.markdown(
-        """
-        <div class="small-note">
-            <strong>Fórmula-base do MVP</strong><br>
-            Forward = Spot × Fator BRL ÷ Fator USD<br><br>
-            Resultado para compra de USD = (taxa de liquidação − taxa contratada) × nocional.<br>
-            Resultado para venda de USD = (taxa contratada − taxa de liquidação) × nocional.
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
-
-st.divider()
-st.markdown(
-    '<div class="footer-note">Ferramenta indicativa para simulação. Não substitui confirmação de taxa, convenções contratuais, curvas de mercado, documentação jurídica ou validação da contraparte.</div>',
-    unsafe_allow_html=True,
+st.caption(
+    "Ferramenta indicativa. A precificação desta versão segue a convenção linear simples Dias/360 para aderir à calculadora de referência enviada."
 )

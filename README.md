@@ -1,4 +1,4 @@
-# Simulador NDF - MVP
+# Simulador NDF - MVP Validado
 
 ## Como rodar
 
@@ -7,25 +7,35 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## Observação importante
+## O que mudou nesta versão
 
-Esta versão já inclui um arquivo `.streamlit/config.toml` para **forçar o app em modo claro**.
+- layout mais enxuto e objetivo
+- datas em DD/MM/AAAA
+- números formatados no padrão brasileiro
+- memória de cálculo em expander
+- fórmula de taxa a termo ajustada para **bater com a calculadora de referência**
+- convenção usada: **juros simples com base Dias/360**
 
-## Escopo atual
+## Fórmula usada
 
-- Precificação indicativa por diferencial de juros
-- Compra e venda de USD
-- Spread em pontos ou percentual
-- Resultado no vencimento
-- Comparação hedge x sem hedge
-- Memória de cálculo
-- Visual mais limpo e 100% claro
+Para o par informado:
 
-## Próximas evoluções
+```text
+Forward = Spot × (1 + juros_moeda_cotada × dias/base) / (1 + juros_moeda_base × dias/base)
+```
 
-- Calendário de feriados
-- Curva DI e curva USD por vértice
-- PTAX automática
-- Mark-to-market
-- Carteira de contratos
-- Exportação Excel/PDF
+## Validação enviada pelo usuário
+
+Com os parâmetros:
+- USD/BRL
+- spot = 5,0725
+- juros base = 3,75%
+- juros cotada = 14,25%
+- dias = 360
+
+resultado esperado:
+- taxa a termo = 5,585861
+- termo em pontos = 0,513361
+- pips = 5.133,61
+
+A app está ajustada para reproduzir essa lógica.
