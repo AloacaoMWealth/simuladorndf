@@ -7,6 +7,10 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
+## Observação importante
+
+Esta versão já inclui um arquivo `.streamlit/config.toml` para **forçar o app em modo claro**.
+
 ## Escopo atual
 
 - Precificação indicativa por diferencial de juros
@@ -15,6 +19,7 @@ streamlit run app.py
 - Resultado no vencimento
 - Comparação hedge x sem hedge
 - Memória de cálculo
+- Visual mais limpo e 100% claro
 
 ## Próximas evoluções
 
