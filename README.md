@@ -1,41 +1,38 @@
-# Simulador NDF - MVP Validado
+# Simulador de NDF / Trava Cambial - V5
 
-## Como rodar
+## Como executar
 
 ```bash
 pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## O que mudou nesta versão
+## Estrutura desta versão
 
-- layout mais enxuto e objetivo
-- datas em DD/MM/AAAA
-- números formatados no padrão brasileiro
-- memória de cálculo em expander
-- fórmula de taxa a termo ajustada para **bater com a calculadora de referência**
-- convenção usada: **juros simples com base Dias/360**
+- tela única e objetiva;
+- compra para importação ou venda para exportação;
+- consulta automática da PTAX mais recente pelo serviço OData do Banco Central;
+- fallback para preenchimento manual se a API estiver indisponível;
+- seleção entre PTAX média, compra ou venda;
+- taxa NDF manual, calculada por over spot ou taxa a termo indicativa;
+- vencimento, dias corridos e dias úteis estimados;
+- taxa travada, over spot e equivalente em reais;
+- cenário de USD/BRL no vencimento;
+- payoff de compra e venda;
+- geração de PDF da simulação;
+- metodologia e memória de cálculo escondidas em um expander;
+- modo claro forçado.
 
-## Fórmula usada
+## Observação importante
 
-Para o par informado:
+A opção `Taxa a termo indicativa` utiliza juros simples em Dias/360 apenas como referência didática:
 
 ```text
-Forward = Spot × (1 + juros_moeda_cotada × dias/base) / (1 + juros_moeda_base × dias/base)
+Forward = Spot × (1 + juros BRL × dias/360) / (1 + juros USD × dias/360)
 ```
 
-## Validação enviada pelo usuário
+Para uma simulação comercial ou contratual, o modo recomendado é `Taxa negociada / manual`, com a taxa efetivamente cotada pela contraparte.
 
-Com os parâmetros:
-- USD/BRL
-- spot = 5,0725
-- juros base = 3,75%
-- juros cotada = 14,25%
-- dias = 360
+## PTAX
 
-resultado esperado:
-- taxa a termo = 5,585861
-- termo em pontos = 0,513361
-- pips = 5.133,61
-
-A app está ajustada para reproduzir essa lógica.
+A aplicação consulta o endpoint oficial do serviço PTAX/OData do Banco Central e prioriza o registro classificado como `Fechamento PTAX`. Se a consulta falhar, o campo de spot permanece editável.
