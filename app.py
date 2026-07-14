@@ -280,7 +280,6 @@ st.markdown(
     f"""
     <div class="hero-card">
         <div class="hero-title">Simulador de NDF e Hedge Cambial</div>
-        <div class="hero-subtitle">Versão mais objetiva, com datas em DD/MM/AAAA, números no padrão brasileiro e fórmula aderente à sua calculadora de taxa a termo.</div>
         <div class="hero-chip-wrap">
             <div class="hero-chip">{pair}</div>
             <div class="hero-chip">{direction}</div>
